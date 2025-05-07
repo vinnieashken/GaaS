@@ -149,6 +149,9 @@ class AuthController extends Controller
         path: '/api/auth/client/token',
         description: 'Generate an OAUTH token for use with other endpoints',
         summary: 'Generate an access token',
+        security:[
+            ['AppKey' => []]
+        ],
         requestBody: new OA\RequestBody(
             required: true,
             content: new OA\MediaType(
@@ -280,6 +283,9 @@ class AuthController extends Controller
         path: '/api/auth/refresh/token',
         description: 'Regenerate an access token',
         summary: 'Renew access token',
+        security:[
+            ['AppKey' => []]
+        ],
         requestBody: new OA\RequestBody(
             required: true,
             content: new OA\MediaType(
