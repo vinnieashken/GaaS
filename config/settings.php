@@ -1,0 +1,15 @@
+<?php
+
+return [
+
+    'permissions'=>[
+        'internal' =>[
+            'users'=>[
+                'view_users',
+                'create_users',
+                'edit_users',
+                'delete_users',
+            ],
+        ]
+    ]
+];
