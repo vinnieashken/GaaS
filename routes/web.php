@@ -5,6 +5,7 @@ use App\Http\Controllers\DocumentationController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\Providers\DpoController;
 use App\Http\Controllers\Providers\MpesaController;
+use App\Http\Controllers\Providers\PaypalController;
 use App\Jobs\NotifyWebhook;
 use App\Models\Order;
 use Illuminate\Support\Facades\Route;
@@ -31,18 +32,23 @@ Route::group(['middleware' => ['auth']], function () {
 
 Route::get('/welcome', function () {
 
-    $order = Order::with(['gateway'])->find(8);
+    $order = Order::with(['gateway'])->find(27);
     $gateway = $order->gateway;
     $config = (object)$gateway->config;
     //NotifyWebhook::dispatch("https://example.com",webhook_payload($order),"gateway",$order->id);
-    $mpesa = new \App\Utils\MpesaUtil($config->base_url,$config->consumer_key,$config->consumer_secret,$config->passkey);
-    dd( $mpesa->stKPush($config->shortcode,$order->identifier,(int)$order->amount,$order->customer_phone,redirect_url(route('mpesa.stkcallback'))) );
+    //$mpesa = new \App\Utils\MpesaUtil($config->base_url,$config->consumer_key,$config->consumer_secret,$config->passkey);
+    //dd( $mpesa->stKPush($config->shortcode,$order->identifier,(int)$order->amount,$order->customer_phone,redirect_url(route('mpesa.stkcallback'))) );
+    $util = new \App\Utils\PaypalUtil($config->api_url,$config->client_id,$config->client_secret);
+    $res = $util->orderDetails($order->provider_code);
+    dd($res);
 
     dd('done');
 });
 
 Route::get('dpo/{order}/checkout', [DpoController::class, 'checkout'])->name('dpo.checkout');
 Route::get('dpo/callback', [DpoController::class, 'callback'])->name('dpo.callback');
+Route::post('paypal/callback', [PayPalController::class, 'callback'])->name('paypal.callback');
+Route::get('paypal/fallback', [PayPalController::class, 'callback'])->name('paypal.fallback');
 
 Route::group(['prefix' => 'mpesa'],function(){
     Route::post('stk_callback', [MpesaController::class, 'stk_callback'])->name('mpesa.stkcallback');

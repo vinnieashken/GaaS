@@ -46,6 +46,20 @@ class GatewaySeeder extends Seeder
             ]
         ]);
 
+        $paypal = Gateway::create([
+            'identifier' => 'COM_PAYPAL',
+            'name' => 'PAYPAL',
+            'provider' => 'paypal',
+            'type' => 'card',
+            'status' => 'active',
+            'description' =>'collect payments via paypal online',
+            'config' => [
+                'client_id' => 'AaoT21awRHtUfjfZ0CDVEBUc49VNHXeHcOCw9arqOzeDPN8bHGzuRDBCl1kpWpy0m0hHwY4d8XpediVt',
+                'client_secret' => 'ECUYz2CBjBupWsAKZ-xNTkT-xce6gW2Q205_GiYRuQkuel6csGkIlSk5eTKd7FcBuDMtt7zN8-ItV7TD',
+                'api_url' => 'https://sandbox.paypal.com',
+            ]
+        ]);
+
         $mobile_money = Currency::create([
             'name' => 'Kenyan shilling',
             'code' => 'KES',
@@ -67,15 +81,26 @@ class GatewaySeeder extends Seeder
             'country' => 'TZ',
         ]);
 
-        Currency::create([
+        $usd = Currency::create([
             'name' => 'US Dollar',
             'code' => 'USD',
             'symbol' => '$',
             'country' => 'US',
         ]);
 
+        $euro = Currency::create([
+            'name' => 'Euro',
+            'code' => 'EUR',
+            'symbol' => 'EUR',
+            'country' => 'EU',
+        ]);
+
         $mpesa->currencies()->attach([$mobile_money->id]);
-        $dpocurrencies = Currency::all();
-        $dpo->currencies()->attach($dpocurrencies->pluck('id')->toArray());
+
+        $allcurrencies = Currency::all();
+
+        $dpo->currencies()->attach($allcurrencies->pluck('id')->toArray());
+
+        $paypal->currencies()->attach([$usd->id,$euro->id]);
     }
 }

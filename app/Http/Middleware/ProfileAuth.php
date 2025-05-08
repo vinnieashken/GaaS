@@ -26,7 +26,13 @@ class ProfileAuth
 
         $publicKey = file_get_contents(storage_path('oauth-public.key'));
 
-        $decoded = JWT::decode($token, new Key($publicKey, 'RS256'));
+        try{
+            $decoded = JWT::decode($token, new Key($publicKey, 'RS256'));
+        }catch (\Exception $exception){
+            report($exception);
+            return $this->error("Invalid or expired access token",['invalid access credentials']);
+        }
+
         $decoded = @$decoded->{0};
 
         $tokenRecord = ProfileToken::where('access_token', $decoded)

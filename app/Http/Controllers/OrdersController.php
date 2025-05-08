@@ -7,6 +7,7 @@ use App\Models\Gateway;
 use App\Models\Order;
 use App\Models\Transaction;
 use App\Traits\Response;
+use App\Utils\PaypalUtil;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
@@ -92,6 +93,12 @@ class OrdersController extends Controller
                                     description: "Customer identifier (email or unique key)",
                                     type: "string",
                                     example: "john@example.com"
+                                ),
+                                new OA\Property(
+                                    property: "provider_code",
+                                    description: "A unique order code from the payment provider. useful for paypal integration",
+                                    type: "string",
+                                    example: "13ebcg3747790"
                                 ),
                                 new OA\Property(
                                     property: "redirect_url",
@@ -402,6 +409,22 @@ class OrdersController extends Controller
                     'currency' => $order->currency,
                 ];
             }
+            if($gateway->provider == 'paypal')
+            {
+                $url = $gateway->config->api_url;
+                $client_id = $gateway->config->client_id;
+                $client_secret = $gateway->config->client_secret;
+                $util = new PaypalUtil($url, $client_id, $client_secret);
+                $result = $util->createOrder($order->amount,$order->identifier,$order->currency);
+
+                if(!is_null($result)){
+                    $order->status = Order::STATUS_PROCESSING;
+                    $order->provider_code = $result->id;
+                    $order->provider_initial_response = $result->status;
+                    $order->provider_initial_response_data = (array)$result;
+                    $order->save();
+                }
+            }
         }
         else{
             return $this->error("Unable to initialize payment request",[$result->message],500);
@@ -415,6 +438,7 @@ class OrdersController extends Controller
             'amount' => $order->amount,
             'currency' => $order->currency,
             'customer_identifier' => $order->customer_identifier,
+            'provider_code' => $order->provider_code,
             'redirect_url' => resolve_redirect($order),
             'display_info' => $display_info
         ];
