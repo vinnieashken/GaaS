@@ -53,7 +53,7 @@ class DpoController extends Controller
         }
 
         $query = http_build_query([
-            'status' => Order::STATUS_ERROR,
+            'status' => Order::STATUS_FAILED,
             'message' => 'Unable to process transaction',
         ]);
 

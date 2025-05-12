@@ -8,6 +8,7 @@ use App\Models\Order;
 use App\Models\Transaction;
 use App\Traits\Response;
 use App\Utils\PaypalUtil;
+use App\Utils\ProviderResolver;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
@@ -326,7 +327,7 @@ class OrdersController extends Controller
                 return $this->error("Validation failed!",[$validator->errors()->first()],400);
             }
         }
-        else{
+        elseif($gateway->provider == 'dpo'){
             $validator = Validator::make($request->all(), [
                 'redirect_url' => 'required',
             ]);
@@ -379,10 +380,14 @@ class OrdersController extends Controller
                     'provider_response' => null,
                 ]);
 
+                $providerResolver = new ProviderResolver($gateway,$order);
+                $result = $providerResolver->resolve();
+
                 return [
                     'status' => true,
                     'order' => $order,
                     'transaction' => $transaction,
+                    'provider_result' => $result,
                 ];
 
             }catch (\Exception $e){
@@ -396,41 +401,17 @@ class OrdersController extends Controller
         });
 
         $display_info = null;
+        $redirect_url = null;
         $result = (object)$result;
         if($result->status){
             $order = $result->order;
-            if($gateway->provider == 'safaricom' && !is_null($order->customer_phone))
-            {
-                OrderSTKPush::dispatch($order,$gateway);
-                $display_info = [
-                    'paybill' => @$gateway->config->shortcode,
-                    'account_number' => $order->identifier,
-                    'amount' => $order->amount,
-                    'currency' => $order->currency,
-                ];
-            }
-            if($gateway->provider == 'paypal')
-            {
-                $url = $gateway->config->api_url;
-                $client_id = $gateway->config->client_id;
-                $client_secret = $gateway->config->client_secret;
-                $util = new PaypalUtil($url, $client_id, $client_secret);
-                $result = $util->createOrder($order->amount,$order->identifier,$order->currency);
-
-                if(!is_null($result)){
-                    $order->status = Order::STATUS_PROCESSING;
-                    $order->provider_code = $result->id;
-                    $order->provider_initial_response = $result->status;
-                    $order->provider_initial_response_data = (array)$result;
-                    $order->save();
-                }
-            }
+            $display_info = $result->provider_result['display_info'];
+            $redirect_url = $result->provider_result['redirect_url'];
         }
         else{
-            return $this->error("Unable to initialize payment request",[$result->message],500);
+            return $this->error("Unable to initialize payment request",[$result->message],400);
         }
 
-        $order->gatway = $gateway;
         $data = [
             'payment_request_identifier' => $order->uuid,
             'invoice_number' => $order->invoice_number,
@@ -439,7 +420,7 @@ class OrdersController extends Controller
             'currency' => $order->currency,
             'customer_identifier' => $order->customer_identifier,
             'provider_code' => $order->provider_code,
-            'redirect_url' => resolve_redirect($order),
+            'redirect_url' => $redirect_url,
             'display_info' => $display_info
         ];
 

@@ -38,8 +38,11 @@ Route::get('/welcome', function () {
     //NotifyWebhook::dispatch("https://example.com",webhook_payload($order),"gateway",$order->id);
     //$mpesa = new \App\Utils\MpesaUtil($config->base_url,$config->consumer_key,$config->consumer_secret,$config->passkey);
     //dd( $mpesa->stKPush($config->shortcode,$order->identifier,(int)$order->amount,$order->customer_phone,redirect_url(route('mpesa.stkcallback'))) );
-    $util = new \App\Utils\PaypalUtil($config->api_url,$config->client_id,$config->client_secret);
-    $res = $util->orderDetails($order->provider_code);
+    //$util = new \App\Utils\PaypalUtil($config->api_url,$config->client_id,$config->client_secret);
+    //$res = $util->orderDetails($order->provider_code);
+    $util = new \App\Utils\AirtelMoneyUtil("https://openapiuat.airtel.africa","3ccb3313-542a-4c6b-8b93-abf3ed8546c9","****************************");
+    $res = $util->token();
+    $res = $util->charge("ZXVFGT",20,"KES","KE","6694","707563017");
     dd($res);
 
     dd('done');
