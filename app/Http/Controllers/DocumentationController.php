@@ -7,14 +7,34 @@ use OpenApi\Generator;
 
 class DocumentationController extends Controller
 {
+    public $versions;
+    public function __construct()
+    {
+        $this->versions = ['v1'];
+    }
     public function index()
     {
-        return view('docs.swagger');
+        $reversed = array_reverse($this->versions);
+        $version = $reversed[0];
+
+        return redirect()->route('docs.show',['version' => $version]);
     }
 
-    public function swagger(Request $request)
+    public function documentation(Request $request, $version)
     {
-        $openapi = Generator::scan([app_path('Http/Controllers')]);
+        $reversed = array_reverse($this->versions);
+        if(!in_array($version, $reversed)){
+            $latest_version = $reversed[0];
+            return redirect()->route('docs.show',['version' => $latest_version]);
+        }
+        $versions = $reversed;
+        return view('docs.swagger', compact('version','versions'));
+    }
+
+    public function swagger(Request $request,$version)
+    {
+        $openapi = Generator::scan([app_path('Http/Controllers/Api/'.strtoupper($version))]);
         return response()->json(json_decode($openapi->toJson()));
     }
+
 }

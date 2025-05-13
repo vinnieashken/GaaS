@@ -82,15 +82,13 @@ class DpoUtil
     private function request($payload)
     {
         $client = new Client(['headers' => [ 'Content-Type' => 'application/xml' ],
-            'verify'=> base_path('/cacert.pem'),'http_errors'=>true]);
+            'verify'=> base_path('/cacert.pem'),'http_errors'=>false]);
 
         $response = null;
-
         try{
             $response = $client->request('POST', $this->apiUrl, [
                 'body' => $payload
             ]);
-
         }catch(\Exception $e)
         {
             report($e);
@@ -100,6 +98,15 @@ class DpoUtil
             return  null;
 
         $responseBody = @$response->getBody()->getContents();
+
+        if(!isXmlString($responseBody))
+        {
+            return (object)[
+                'Result' => "9999990",
+                'ResultExplanation' => 'Invalid XML response from dpo. check request input parameters (RedirectURL,BackURL,CompanyToken,PaymentAmount,PaymentCurrency,CompanyRef)',
+            ];
+        }
+
         return (object)XmlToArray::convert($responseBody);
     }
 

@@ -49,7 +49,7 @@ class ProviderResolver
     public function mpesa($gateway,$order)
     {
         $config = $gateway->config;
-        $baseUrl = $config->base_url;
+        $baseUrl = $config->api_url;
         $consumerKey = $config->consumer_key;
         $consumerSecret = $config->consumer_secret;
         $passKey = $config->passkey;
@@ -65,16 +65,24 @@ class ProviderResolver
             $result = $util->stKPush($shortCode,$reference,$amount,$msisdn,$callbackUrl);
             if($result)
             {
-                if($result->ResponseCode==0)
+                $this->order->provider_initial_response_data = (array)$result;
+                if(@$result->ResponseCode=="0")
                 {
                     $order->provider_code = $result->CheckoutRequestID;
                     $order->status = Order::STATUS_PROCESSING;
+                    $this->order->provider_initial_response = $result->ResponseDescription;
+                    $this->order->save();
                 }
-                $this->order->provider_initial_response = $result->ResponseDescription;
+                elseif(@$result->errorCode)
+                {
+                    $this->order->provider_initial_response = $result->errorMessage;
+                    $this->order->save();
+                    throw new \Exception("Error: " . $this->order->provider_initial_response);
+                }
             }
-            $result = (array)$result;
-            $this->order->provider_initial_response_data = $result;
-            $this->order->save();
+            else{
+                throw new \Exception("Error: " ."Unable to process STK push request.");
+            }
         }
         return $result;
     }
@@ -115,6 +123,7 @@ class ProviderResolver
             $order->provider_initial_response = $response->ResultExplanation;
             $order->provider_initial_response_data = json_encode($response);
             $order->save();
+            throw new \Exception("Error: " . $this->order->provider_initial_response);
         }
 
         return $response;

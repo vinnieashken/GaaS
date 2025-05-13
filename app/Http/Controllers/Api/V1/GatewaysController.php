@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Api\V1;
 
+use App\Http\Controllers\Controller;
 use App\Models\Gateway;
 use App\Traits\Response;
 use Illuminate\Http\Request;
@@ -13,10 +14,28 @@ class GatewaysController extends Controller
 
     public function getGateways(Request $request){
 
-        $size = $request->size ?? 1;
+        $size = $request->size ?? 20;
         $result = Gateway::where('status', 'active')
-            ->select('id', 'name','identifier','provider','type','image_url')
+            ->select('id', 'name','identifier','provider','type','image_url','config')
             ->paginate($size);
+
+        $items = $result->map(function ($item) {
+
+            return [
+                'id' => $item->id,
+                'name' => $item->name,
+                'identifier' => $item->identifier,
+                'provider' => $item->provider,
+                'type' => $item->type,
+                'image_url' => $item->image_url,
+                'client_id' => ($item->provider == 'paypal') ? $item->config->client_id : null,
+                'currencies' => $item->currencies->map(function ($currency) {
+                    return ['code' => $currency->code, 'name' => $currency->name];
+                })
+            ];
+        });
+
+        $result->setCollection($items);
 
        $meta = [
            'current_page' => $result->currentPage(),
@@ -32,7 +51,7 @@ class GatewaysController extends Controller
 
 
     #[OA\Get(
-        path: '/api/gateways',
+        path: '/api/v1/gateways',
         description: 'Get a list of allowed gateways',
         summary: 'List client gateways',
         security: [
@@ -40,6 +59,10 @@ class GatewaysController extends Controller
             ['AppKey' => []]
         ],
         tags: ['Gateways'],
+        parameters: [
+            new OA\Parameter(name: "page",description:"Page number",in: "query",required: false,schema: new OA\Schema(type: "integer",default: 1)),
+            new OA\Parameter(name: "size",description:"Items per page.",in: "query",required: false,schema: new OA\Schema(type: "integer",default: 20)),
+        ],
         responses: [
             new OA\Response(
                 response: 200,
@@ -69,6 +92,7 @@ class GatewaysController extends Controller
                                     new OA\Property(property: "identifier", description: "A unique identifier of the gateway instance", type: "string",example: "MPESA200300"),
                                     new OA\Property(property: "provider", description: "The name of the payments system provider", type: "string",example: "safaricom"),
                                     new OA\Property(property: "type", description: "The type of the payment gateway.", type: "string",example: "mobile_money"),
+                                    new OA\Property(property: "client_id", description: "A unique identifier supplied the vendor for use by the client.", type: "string",example: "AaoT21awRHtUfjfZ0CDVEBUc49VNHXeHcO",nullable: true),
                                     new OA\Property(property: "image_url", description: "A link to an image for branding purposes. can be null", type: "string",example: "https://example.com/image.png"),
                                     new OA\Property(property: "currencies", description: "The currencies supported by the gateway",
                                         type: "array",
@@ -123,17 +147,18 @@ class GatewaysController extends Controller
     {
         $profile = $request->profile;
 
-        $size = $request->size ?? 10;
+        $size = $request->size ?? 20;
         $result = Gateway::with(['currencies'=>function ($query) {
             return $query->select('code','name');
         }])->where('status', 'active')
             ->whereHas('profiles', function ($query) use ($profile) {
                 $query->where('profile_id', $profile->id);
             })
-            ->select('id', 'name','identifier','provider','type','image_url')
+            ->select('id', 'name','identifier','provider','type','image_url','config')
             ->paginate($size);
 
         $items = $result->map(function ($item) {
+
             return [
                 'id' => $item->id,
                 'name' => $item->name,
@@ -141,6 +166,7 @@ class GatewaysController extends Controller
                 'provider' => $item->provider,
                 'type' => $item->type,
                 'image_url' => $item->image_url,
+                'client_id' => ($item->provider == 'paypal') ? $item->config->client_id : null,
                 'currencies' => $item->currencies->map(function ($currency) {
                     return ['code' => $currency->code, 'name' => $currency->name];
                 })

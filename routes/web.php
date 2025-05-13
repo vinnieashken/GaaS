@@ -61,7 +61,8 @@ Route::group(['prefix' => 'mpesa'],function(){
     Route::post('queue_timeout',[MpesaController::class, 'queue_timeout'])->name('mpesa.queuetimeout');
 });
 
-Route::group(['prefix' => 'docs'],function(){
+Route::group(['prefix' => 'docs','middleware' => 'docs'],function(){
     Route::get("/",[DocumentationController::class,'index'])->name('docs');
-    Route::get('swagger',[DocumentationController::class, 'swagger'])->name('docs.swagger');
+    Route::get("/{version}",[DocumentationController::class,'documentation'])->name('docs.show');
+    Route::get('swagger/{version}',[DocumentationController::class, 'swagger'])->name('docs.swagger');
 });

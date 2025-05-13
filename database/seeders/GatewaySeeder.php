@@ -27,7 +27,7 @@ class GatewaySeeder extends Seeder
                 "passkey" => "9e3c394e5389eae52c6f2df3295ff76f2a58a7f88d3593dac8253f4b81264434",
                 "initiator" => "",
                 "initiator_password" => "",
-                "base_url" => "https://api.safaricom.co.ke",
+                "api_url" => "https://api.safaricom.co.ke",
             ]
         ]);
 

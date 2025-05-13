@@ -131,3 +131,17 @@ if(!function_exists("generate_tokens"))
         ];
     }
 }
+
+if(!function_exists("isXmlString"))
+{
+    function isXmlString(string $input): bool
+    {
+        libxml_use_internal_errors(true);
+        $xml = simplexml_load_string($input);
+        if ($xml === false) {
+            libxml_clear_errors();
+            return false;
+        }
+        return true;
+    }
+}

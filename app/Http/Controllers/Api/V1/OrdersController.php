@@ -1,13 +1,12 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Api\V1;
 
-use App\Jobs\OrderSTKPush;
+use App\Http\Controllers\Controller;
 use App\Models\Gateway;
 use App\Models\Order;
 use App\Models\Transaction;
 use App\Traits\Response;
-use App\Utils\PaypalUtil;
 use App\Utils\ProviderResolver;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -19,7 +18,7 @@ class OrdersController extends Controller
     use Response;
 
     #[OA\Post(
-        path: '/api/payment/initiate',
+        path: '/api/v1/payment/initiate',
         description: 'Create a payment request',
         summary: 'Initiate Payment',
         security:[
@@ -117,7 +116,7 @@ class OrdersController extends Controller
                                             property: "paybill",
                                             description: "Paybill number for mobile payments",
                                             type: "string",
-                                            example: "500400"
+                                            example: "700400"
                                         ),
                                         new OA\Property(
                                             property: "account_number",

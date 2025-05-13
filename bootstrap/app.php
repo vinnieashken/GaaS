@@ -2,6 +2,7 @@
 
 use App\Http\Middleware\AppKey;
 use App\Http\Middleware\ProfileAuth;
+use App\Http\Middleware\ProtectDocs;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -19,6 +20,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'permission' => Spatie\Permission\Middleware\PermissionMiddleware::class,
             'profile_auth' => ProfileAuth::class,
             'appkey' => AppKey::class,
+            'docs' => ProtectDocs::class
         ]);
         $middleware->validateCsrfTokens(except: [
             'mpesa/*',

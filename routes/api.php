@@ -1,8 +1,8 @@
 <?php
 
-use App\Http\Controllers\AuthController;
-use App\Http\Controllers\GatewaysController;
-use App\Http\Controllers\OrdersController;
+use App\Http\Controllers\Api\V1\GatewaysController;
+use App\Http\Controllers\Api\V1\OrdersController;
+use App\Http\Controllers\Api\V1\AuthController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -10,7 +10,7 @@ Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:api');
 
-Route::group(['middleware' => ['api','appkey']], function () {
+Route::group(['prefix'=> 'v1','middleware' => ['api','appkey']], function () {
 
     Route::get('gateways/list', [GatewaysController::class, 'getGateways']);
 
