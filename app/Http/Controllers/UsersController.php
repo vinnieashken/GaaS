@@ -17,6 +17,16 @@ class UsersController extends Controller
 
     public function index()
     {
+        $user = auth()->user();
+        $user = User::find($user->id);
+
+        $filters = [
+        ];
+        if($user->designation !== "internal")
+        {
+            $filters ['parent_id'] = $user->parent_id;
+        }
+
         $options =[
             'model' => User::class,
             'relations' => [],
@@ -25,6 +35,7 @@ class UsersController extends Controller
                 '#' => 'id',
                 'Email' => 'email',
                 'Name' => 'name',
+                'Category' => 'designation',
                 'Status' => 'status',
                 'Date Created' => 'created_at',
             ],
@@ -37,8 +48,7 @@ class UsersController extends Controller
             'selectors' => [
                 'status' => ['active', 'inactive'],
             ],
-            'filters' => [
-            ],
+            'filters' => $filters,
             'actions' => [
                 'edit' => [
                     'method' => 'GET',
@@ -64,7 +74,8 @@ class UsersController extends Controller
 
     public function create()
     {
-        $data['statuses'] = ['active','inactive'];
+        $data['statuses'] = ['inactive','active'];
+        $data['designations'] = [User::EXTERNAL,User::INTERNAL];
         $data['permissions'] = Permission::whereScope('internal')->get()->groupBy('group');
 
         return view('pages.users.create',compact('data'));
@@ -79,6 +90,8 @@ class UsersController extends Controller
             'password' => 'required | confirmed |min:6',
             'password_confirmation' => 'required',
             'status' => 'required',
+            'designation' => 'required',
+            'parent_email' => 'sometimes|exists:users,email',
         ]);
 
         if($validator->fails())
@@ -100,12 +113,25 @@ class UsersController extends Controller
             }
             else{
 
+                if($request->has('parent_email'))
+                {
+                    $parent = User::where('email',$request->parent_email)->first();
+                }
+
                 $user = User::create([
                     'email' => $request->email,
                     'name' => $request->name,
                     'password' => Hash::make($request->password),
                     'status' => $request->status,
+                    'designation' => $request->designation,
+                    'parent_id' => (isset($parent)) ? $parent->id : null,
                 ]);
+
+                if($user->designation == User::EXTERNAL && is_null($user->parent_id))
+                {
+                    $user->parent_id = $user->id;
+                    $user->save();
+                }
             }
             if($request->permissions)
             {
@@ -126,7 +152,8 @@ class UsersController extends Controller
 
     public function edit(User $user)
     {
-        $data['statuses'] = ['active','inactive'];
+        $data['statuses'] = ['inactive','active'];
+        $data['designations'] = [User::EXTERNAL,User::INTERNAL];
         $data['user'] = $user;
         $data['permissions'] = Permission::whereScope('internal')->get()->groupBy('group');
 
@@ -141,6 +168,8 @@ class UsersController extends Controller
             'password' => 'required_with:password_confirmation | confirmed',
             'password_confirmation' => 'required_with:password',
             'status' => 'required',
+            'designation' => 'required',
+            'parent_email' => 'sometimes|exists:users,email',
         ]);
 
         if($validator->fails())
@@ -150,17 +179,29 @@ class UsersController extends Controller
         }
 
         try{
+            if($request->has('parent_email'))
+            {
+                $parent = User::where('email',$request->parent_email)->first();
+            }
+
             $data = [
                 'email' => $request->email,
                 'name' => $request->name,
                 'status' => $request->status,
-                //'phone' => $request->phone
+                'designation' => $request->designation,
+                'parent_id' => (isset($parent)) ? $parent->id : null,
             ];
             if($request->has('password') && !is_null($request->password))
             {
                 $data['password'] = Hash::make($request->password);
             }
             $user->update($data);
+
+            if($user->designation == User::EXTERNAL && is_null($user->parent_id))
+            {
+                $user->parent_id = $user->id;
+                $user->save();
+            }
 
             if($request->permissions)
             {

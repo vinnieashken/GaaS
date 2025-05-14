@@ -21,6 +21,7 @@ return new class extends Migration
             $table->string('password');
             $table->citext('designation')->default('internal');
             $table->citext('status')->default('active');
+            $table->unsignedBigInteger('parent_id')->nullable();
             $table->rememberToken();
             $table->timestamps();
         });

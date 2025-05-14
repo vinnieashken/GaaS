@@ -42,14 +42,7 @@
                             </div>
                         </div>
                         <div class="form-row">
-{{--                            <div class="form-group col-md-6">--}}
-{{--                                <label for="">Phone</label>--}}
-{{--                                <input type="text" name="phone" class="form-control" value="{{ old('phone',$user->phone) }}" placeholder="Phone number" required>--}}
-{{--                                @if($errors->has('phone'))--}}
-{{--                                    <div class="error text-danger mt-2">{{ $errors->first('phone') }}</div>--}}
-{{--                                @endif--}}
-{{--                            </div>--}}
-                            <div class="form-group col-md-6">
+                            <div class="form-group col-md-3">
                                 <label for="">Status</label>
                                 <select class="form-control" name="status">
                                     @foreach($statuses as $status)
@@ -61,6 +54,26 @@
                                     @endforeach
                                 </select>
                             </div>
+                            @if(auth()->user()->designation == \App\Models\User::EXTERNAL)
+                                <input type="hidden" name="designation" value="{{ ''.\App\Models\User::EXTERNAL }}">
+                                <input type="hidden" name="parent_email" value="{{ auth()->user()->parent->email }}">
+                            @else
+                            <div class="form-group col-md-3">
+                                <label for="">Category</label>
+                                <select class="form-control" name="designation">
+                                    @foreach($designations as $designation)
+                                        <option @if($user->designation) selected @endif value="{{ $designation }}">{{ ucfirst($designation) }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label for="inputEmail4">Parent Email</label>
+                                <input type="email" name="parent_email" class="form-control"  placeholder="Optional email of parent account" value="{{ old('parent_email',($user->id !== $user->parent_id? @$user->parent->email:null)) }}">
+                                @if($errors->has('parent_email'))
+                                    <div class="error text-danger mt-2">{{ $errors->first('parent_email') }}</div>
+                                @endif
+                            </div>
+                            @endif
                         </div>
 
                         <div class="form-row mt-1">

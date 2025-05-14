@@ -16,13 +16,17 @@ class DatabaseSeeder extends Seeder
     {
         // User::factory(10)->create();
 
-        User::factory()->create(
+        $user = User::create(
             [
             'name' => 'Admin',
             'email' => 'admin@company.com',
             'password' => Hash::make('password'),
+            'designation' => User::INTERNAL,
             'status' => 'active',
         ]);
+
+        $user->parent_id = $user->id;
+        $user->save();
 
         $this->call(GatewaySeeder::class);
         $this->call(ProfileSeeder::class);

@@ -69,16 +69,18 @@ class DataTable extends Component
                 $query->withCount($this->relationsCount);
             });
         $query->when($this->search, function ($q, $search) {
-            foreach ($this->search_columns as $column => $type) {
-                $criteria = $column.' like ?';
-                if($type === 'numeric') {
-                    if(is_numeric($search)) {
-                        $q->orWhere($column,$search);
+            return $q->where(function ($q) use ($search) {
+                foreach ($this->search_columns as $column => $type) {
+                    $criteria = $column.' like ?';
+                    if($type === 'numeric') {
+                        if(is_numeric($search)) {
+                            $q->orWhere($column,$search);
+                        }
                     }
+                    else
+                        $q->orWhereRaw($criteria, ["%{$search}%"]);
                 }
-                else
-                    $q->orWhereRaw($criteria, ["%{$search}%"]);
-            }
+            });
         });
         foreach ($this->filters as $column => $value) {
             if(is_array($value))

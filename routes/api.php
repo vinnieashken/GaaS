@@ -12,14 +12,14 @@ Route::get('/user', function (Request $request) {
 
 Route::group(['prefix'=> 'v1','middleware' => ['api','appkey']], function () {
 
-    Route::get('gateways/list', [GatewaysController::class, 'getGateways']);
+    Route::any('gateways/list', [GatewaysController::class, 'getGateways']);
 
-    Route::post('auth/user/token',[AuthController::class, 'userToken']);
-    Route::post('auth/client/token',[AuthController::class, 'clientToken']);
-    Route::post('auth/refresh/token',[AuthController::class, 'refreshToken']);
+    Route::any('auth/user/token',[AuthController::class, 'userToken']);
+    Route::any('auth/client/token',[AuthController::class, 'clientToken']);
+    Route::any('auth/refresh/token',[AuthController::class, 'refreshToken']);
 
     Route::group(['middleware' => 'profile_auth:api'], function () {
-        Route::post('payment/initiate',[OrdersController::class,'paymentRequest']);
-        Route::get('gateways',[GatewaysController::class,'getProfileGateways']);
+        Route::any('payment/initiate',[OrdersController::class,'paymentRequest']);
+        Route::any('gateways',[GatewaysController::class,'getProfileGateways']);
     });
 });

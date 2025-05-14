@@ -23,6 +23,9 @@ class User extends Authenticatable  implements AuditableContract
      */
     protected $guarded = [];
 
+    const INTERNAL='internal';
+    const EXTERNAL='external';
+
     /**
      * The attributes that should be hidden for serialization.
      *
@@ -44,5 +47,15 @@ class User extends Authenticatable  implements AuditableContract
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    public function subUsers()
+    {
+        return $this->hasMany(User::class,'id','parent_id');
+    }
+
+    public function parent()
+    {
+        return $this->belongsTo(User::class,'parent_id','id');
     }
 }
