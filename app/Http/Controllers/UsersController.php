@@ -22,6 +22,7 @@ class UsersController extends Controller
 
         $filters = [
         ];
+
         if($user->designation !== "internal")
         {
             $filters ['parent_id'] = $user->parent_id;
@@ -29,8 +30,11 @@ class UsersController extends Controller
 
         $options =[
             'model' => User::class,
+            'title' => "Users",
             'relations' => [],
             'relationsCount' => [],
+            'relationsKeys' => [],
+            'relationSearch' => [],
             'columns' => [
                 '#' => 'id',
                 'Email' => 'email',
@@ -91,7 +95,7 @@ class UsersController extends Controller
             'password_confirmation' => 'required',
             'status' => 'required',
             'designation' => 'required',
-            'parent_email' => 'sometimes|exists:users,email',
+            'parent_email' => 'sometimes',
         ]);
 
         if($validator->fails())

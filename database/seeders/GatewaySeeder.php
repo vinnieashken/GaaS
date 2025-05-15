@@ -16,7 +16,7 @@ class GatewaySeeder extends Seeder
         $mpesa = Gateway::create([
             'identifier' => 'COM_MPESA_200870',
             'name' => 'MPESA',
-            'provider' => 'safaricom',
+            'provider' => 'mpesa',
             'type' => 'mobile_money',
             'status' => 'active',
             'description' =>'collect payments via MPESA',

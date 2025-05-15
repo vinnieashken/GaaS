@@ -25,7 +25,7 @@ class ProviderResolver
             'display_info' => null,
         ];
 
-        if($this->gateway->provider == 'safaricom'){
+        if($this->gateway->provider == 'mpesa'){
             $this->mpesa($this->gateway,$this->order);
             $result['display_info'] = [
                 'paybill' => @$this->gateway->config->shortcode,

@@ -12,6 +12,7 @@ class DataTable extends Component
     protected string $paginationTheme = 'bootstrap';
 
     public string $model;
+    public string $title;
     public array $columns = [];
     public array $filters = [];
     public array $search_columns = [];
@@ -22,8 +23,11 @@ class DataTable extends Component
     public string $perPage = '10';
     public array $relations = [];
     public array $relationsCount = [];
+    public array $relationsKeys = [];
+    public array $relationSearch =[];
     public array $selectors = [];
     public array $selectorValues = []; // Store filter values here
+
 
     public function mount(array $options = [])
     {
@@ -32,6 +36,7 @@ class DataTable extends Component
         }
 
         $this->model = $options['model'];
+        $this->title = $options['title'];
         $this->columns = $options['columns'];
         $this->search_columns = $options['search_columns'];
         $this->actions = $options['actions'];
@@ -39,6 +44,8 @@ class DataTable extends Component
         $this->filters = $options['filters'];
         $this->selectors = $options['selectors'];
         $this->relationsCount = $options['relationsCount'];
+        $this->relationsKeys = $options['relationsKeys'];
+        $this->relationSearch = $options['relationSearch'];
 
         // Initialize filter values
         foreach ($this->selectors as $key => $filter) {
@@ -59,6 +66,9 @@ class DataTable extends Component
         $select_columns = array_filter($select_columns,function($val){
             return !str_contains($val,'.');
         });
+
+        if(count($this->relations) > 0)
+            $select_columns = array_merge($select_columns,$this->relationsKeys);
 
         $query = $this->model::query();
         $query->select($select_columns)
@@ -81,6 +91,23 @@ class DataTable extends Component
                         $q->orWhereRaw($criteria, ["%{$search}%"]);
                 }
             });
+        })->when(count($this->relationSearch) && $this->search, function ($query) {
+            foreach ($this->relationSearch as $key => $values) {
+                $query->orWhereHas($key, function ($q) use ($values) {
+                    $q->where(function ($q) use ($values) {
+                        foreach ($values as $column => $type) {
+                            $criteria = $column.' like ?';
+                            if($type === 'numeric') {
+                                if(is_numeric($this->search)) {
+                                    $q->orWhere($column,$this->search);
+                                }
+                            }
+                            else
+                                $q->orWhereRaw($criteria, ["%{$this->search}%"]);
+                        }
+                    });
+                });
+            }
         });
         foreach ($this->filters as $column => $value) {
             if(is_array($value))
@@ -96,7 +123,6 @@ class DataTable extends Component
             }
         }
 
-        //dd($select_columns);
         $data['records'] = $query->orderBy($this->sortField, $this->sortDirection)
             ->paginate($this->perPage);
 
@@ -105,6 +131,7 @@ class DataTable extends Component
         $data['columns'] = array_keys($this->columns);
         $data['selectors'] = $select_columns;
         $data['filters'] = $this->selectors;
+        $data['title'] = $this->title;
 
         return view('livewire.data-table',compact('data'));
     }

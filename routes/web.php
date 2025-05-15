@@ -1,11 +1,15 @@
 <?php
 
+use App\Http\Controllers\GatewayController;
+use App\Http\Controllers\AppsController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CurrencyController;
 use App\Http\Controllers\DocumentationController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\Providers\DpoController;
 use App\Http\Controllers\Providers\MpesaController;
 use App\Http\Controllers\Providers\PaypalController;
+use App\Http\Controllers\TransactionsController;
 use App\Jobs\NotifyWebhook;
 use App\Models\Order;
 use Illuminate\Support\Facades\Route;
@@ -27,6 +31,40 @@ Route::group(['middleware' => ['auth']], function () {
         Route::get('{user}/edit',[App\Http\Controllers\UsersController::class, 'edit'])->name('users.edit')->middleware('permission:edit_users');
         Route::patch('{user}/update',[App\Http\Controllers\UsersController::class, 'update'])->name('users.update')->middleware('permission:edit_users');
         Route::delete('{user}/destroy',[App\Http\Controllers\UsersController::class, 'destroy'])->name('users.destroy')->middleware('permission:delete_users');
+    });
+
+    Route::group(['prefix' => 'apps'],function(){
+        Route::get("/",[AppsController::class,'index'])->name('apps');
+        Route::get("create",[AppsController::class,'create'])->name('apps.create');
+        Route::post("store",[AppsController::class,'store'])->name('apps.store');
+        Route::get("{app}",[AppsController::class,'show'])->name('apps.show');
+        Route::get("{app}/edit",[AppsController::class,'edit'])->name('apps.edit');
+        Route::patch("{app}/update",[AppsController::class,'update'])->name('apps.update');
+        Route::delete("{app}/destroy",[AppsController::class,'destroy'])->name('apps.destroy');
+    });
+
+    Route::group(['prefix' => 'currencies'],function(){
+        Route::get("/",[CurrencyController::class,'index'])->name('currencies');
+        Route::get("create",[CurrencyController::class,'create'])->name('currencies.create');
+        Route::post("store",[CurrencyController::class,'store'])->name('currencies.store');
+        //Route::get("{currency}",[CurrencyController::class,'show'])->name('currencies.show');
+        Route::get("{currency}/edit",[CurrencyController::class,'edit'])->name('currencies.edit');
+        Route::patch("{currency}/update",[CurrencyController::class,'update'])->name('currencies.update');
+        Route::delete("{currency}/destroy",[CurrencyController::class,'destroy'])->name('currencies.destroy');
+    });
+
+    Route::group(['prefix' => 'gateways'],function(){
+        Route::get("/",[GatewayController::class,'index'])->name('gateways');
+        Route::get("create",[GatewayController::class,'create'])->name('gateways.create');
+        Route::post("store",[GatewayController::class,'store'])->name('gateways.store');
+        //Route::get("{gateway}",[GatewaysController::class,'show'])->name('gateways.show');
+        Route::get("{gateway}/edit",[GatewayController::class,'edit'])->name('gateways.edit');
+        Route::patch("{gateway}/update",[GatewayController::class,'update'])->name('gateways.update');
+        Route::delete("{gateway}/destroy",[GatewayController::class,'destroy'])->name('gateways.destroy');
+    });
+
+    Route::group(['prefix' => 'transactions'],function(){
+        Route::get("/",[TransactionsController::class,'index'])->name('transactions');
     });
 });
 

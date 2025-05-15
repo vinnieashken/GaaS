@@ -14,23 +14,13 @@
                 </a>
             </li>
             <li class="sidebar-item active">
-                <a class="sidebar-link font-weight-bold" href="{{ '#' }}">
-                    <i class="align-middle" data-feather="menu"></i> <span class="align-middle">Menu Item</span>
+                <a class="sidebar-link font-weight-bold" href="{{ route('apps') }}">
+                    <i class="align-middle" data-feather="cpu"></i> <span class="align-middle">Apps</span>
                 </a>
             </li>
             <li class="sidebar-item active">
-                <a class="sidebar-link font-weight-bold" href="{{ '#' }}">
-                    <i class="align-middle" data-feather="grid"></i> <span class="align-middle">Menu Item</span>
-                </a>
-            </li>
-            <li class="sidebar-item active">
-                <a class="sidebar-link font-weight-bold" href="{{ '#' }}">
-                    <i class="align-middle" data-feather="file-text"></i> <span class="align-middle">Menu Item</span>
-                </a>
-            </li>
-            <li class="sidebar-item active">
-                <a class="sidebar-link font-weight-bold" href="{{ '#' }}">
-                    <i class="align-middle" data-feather="arrow-up-circle"></i> <span class="align-middle">Menu Item</span>
+                <a class="sidebar-link font-weight-bold" href="{{ route('transactions') }}">
+                    <i class="align-middle" data-feather="credit-card"></i> <span class="align-middle">Transactions</span>
                 </a>
             </li>
             <li class="sidebar-header">
@@ -47,15 +37,15 @@
                 </a>
                 <ul id="ui" class="sidebar-dropdown list-unstyled collapse ">
                     <li class="sidebar-item">
-                        <a class="sidebar-link" href="{{ '#' }}">
-                            <i class="align-middle" data-feather="tv"></i>
-                            Sub menu
+                        <a class="sidebar-link" href="{{ route('currencies') }}">
+                            <i class="align-middle" data-feather="dollar-sign"></i>
+                            Currencies
                         </a>
                     </li>
                     <li class="sidebar-item">
-                        <a class="sidebar-link" href="{{ '#' }}">
-                            <i class="align-middle" data-feather="info"></i>
-                            Sub menu
+                        <a class="sidebar-link" href="{{ route('gateways') }}">
+                            <i class="align-middle" data-feather="smartphone"></i>
+                            Gateways
                         </a>
                     </li>
                 </ul>
