@@ -3,9 +3,9 @@
         <i class="align-self-center" data-feather="menu"></i>
     </a>
 
-    <form class="form-inline d-none d-sm-inline-block">
-        <input class="form-control form-control-no-border navbar-search mr-sm-2" type="text" placeholder="Search topics..." aria-label="Search">
-    </form>
+{{--    <form class="form-inline d-none d-sm-inline-block d-none">--}}
+{{--        <input class="form-control form-control-no-border navbar-search mr-sm-2" type="text" placeholder="Search topics..." aria-label="Search">--}}
+{{--    </form>--}}
 
     <div class="navbar-collapse collapse">
         <ul class="navbar-nav ml-auto">

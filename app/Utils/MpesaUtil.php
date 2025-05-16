@@ -78,6 +78,7 @@ class MpesaUtil
 
     public function registerC2BCallbackURL($shortcode,$confirmation_url,$validation_url,$response_type='Cancelled')
     {
+        //Completed
         $data = [
             'ValidationURL'   => $validation_url,
             'ConfirmationURL' => $confirmation_url,

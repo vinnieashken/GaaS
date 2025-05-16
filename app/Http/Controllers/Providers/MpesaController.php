@@ -4,7 +4,9 @@ namespace App\Http\Controllers\Providers;
 
 use App\Http\Controllers\Controller;
 use App\Jobs\NotifyWebhook;
+use App\Models\Gateway;
 use App\Models\Order;
+use App\Utils\MpesaUtil;
 use DateTime;
 use Illuminate\Http\Request;
 
@@ -136,7 +138,6 @@ class MpesaController extends Controller
                 ]);
             }
 
-            $status = Order::STATUS_PARTIALLY_PAID;
             if($order->amount <= $amount){
                 $status = Order::STATUS_SUCCESS;
             }
@@ -252,5 +253,28 @@ class MpesaController extends Controller
     {
         $body = $request->getContent();
         logger($body);
+    }
+
+    public function registerUrl(Request $request)
+    {
+        $body = $request->getContent();
+        $data = json_decode($body, false);
+
+        $gateway_id = $data->gateway_id;
+        $c2burl = $data->c2b_callback ?? route('mpesa.c2bcallback');
+        $validation = $data->validation ?? route('mpesa.validationcallback');
+
+        $gateway = Gateway::where('id', $gateway_id)->first();
+
+        $result = [];
+        if($gateway)
+        {
+            $config = $gateway->config;
+            $util = new MpesaUtil($config->api_url, $config->consumer_key, $config->consumer_secret);
+            $shortCode = $config->shortcode;
+            $result = $util->registerC2BCallbackURL($shortCode,$c2burl,$validation);
+        }
+
+        return response()->json([$result]);
     }
 }
