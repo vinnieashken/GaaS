@@ -33,7 +33,7 @@ class TransactionsController extends Controller
                 'Status' => 'status',
                 'Receipt' => 'receipt',
                 'Provider Code' => 'provider_code',
-                'Provider Response' => 'provider-initial_response',
+                'Provider Response' => 'provider_initial_response',
                 'Date Created' => 'created_at',
             ],
             'search_columns' => [
