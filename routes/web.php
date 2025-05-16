@@ -97,6 +97,7 @@ Route::group(['prefix' => 'mpesa'],function(){
     Route::post('validation_callback', [MpesaController::class, 'validation_callback'])->name('mpesa.validationcallback');
     Route::post('status_query_callback', [MpesaController::class, 'query_status_callback'])->name('mpesa.statusquerycallback');
     Route::post('queue_timeout',[MpesaController::class, 'queue_timeout'])->name('mpesa.queuetimeout');
+    Route::post('registerUrl',[MpesaController::class, 'registerUrl'])->name('mpesa.registerurl');
 });
 
 Route::group(['prefix' => 'docs','middleware' => 'docs'],function(){
